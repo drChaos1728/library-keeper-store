@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Eye, Bookmark } from "lucide-react";
+import BookQuickView from "./BookQuickView";
+import { Book } from "@/lib/api";
 
 interface BookCardProps {
   id: string;
@@ -11,6 +13,10 @@ interface BookCardProps {
   genre: string;
   coverImage: string;
   available?: boolean;
+  ISBN?: string;
+  publishedYear?: number;
+  description?: string;
+  expectedReturn?: string;
 }
 
 const BookCard: React.FC<BookCardProps> = ({
@@ -20,9 +26,28 @@ const BookCard: React.FC<BookCardProps> = ({
   genre,
   coverImage,
   available = true,
+  ISBN,
+  publishedYear,
+  description,
+  expectedReturn,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+
+  // Create a book object to pass to the quick view
+  const book: Book = {
+    id,
+    title,
+    author,
+    genre,
+    coverImage,
+    available,
+    ISBN,
+    publishedYear,
+    description,
+    expectedReturn,
+  };
 
   return (
     <div className="group book-card relative bg-white rounded-2xl overflow-hidden border border-border h-full soft-shadow">
@@ -93,12 +118,23 @@ const BookCard: React.FC<BookCardProps> = ({
       
       {/* Quick View Button (Only visible on hover) */}
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <Link to={`/books/${id}`} className="pointer-events-auto">
-          <Button className="glass-effect bg-white/70 text-primary shadow-lg rounded-full px-6">
-            Quick View
-          </Button>
-        </Link>
+        <Button 
+          onClick={(e) => {
+            e.preventDefault();
+            setQuickViewOpen(true);
+          }}
+          className="glass-effect bg-white/70 text-primary shadow-lg rounded-full px-6 pointer-events-auto"
+        >
+          Quick View
+        </Button>
       </div>
+
+      {/* Quick View Dialog */}
+      <BookQuickView 
+        book={book} 
+        open={quickViewOpen} 
+        onOpenChange={setQuickViewOpen} 
+      />
     </div>
   );
 };
